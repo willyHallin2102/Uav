@@ -1,0 +1,22 @@
+# Avoiding uploading larger files, no 3rd party libraries, or any actual datasets
+# to uploaded
+
+# Python artifact generates are to be ignored with every upload
+__pycache__/
+*.pyc
+*.pyo
+
+
+# Avoid these directories altogether
+.vscode/
+.venv/
+
+
+# Data/Model files to fully ignore
+*.csv
+*.pkl
+*.h5
+*.npy
+
+# Do not upload any logs, not essential
+*.log
