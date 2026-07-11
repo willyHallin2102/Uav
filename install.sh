@@ -10,7 +10,7 @@ set -euo pipefail
 
 # name of the virtual environment as well as define python version
 VENV=".venv"
-PYTHON="{1:-python3.11}"
+PYTHON="${1:-python3.11}"
 
 "$PYTHON" -m venv "$VENV"
 
@@ -27,26 +27,24 @@ python -m pip install --upgrade pip setuptools wheel
 # ----------------------------------------
 # 3rd party Libraries 
 
-cat > requirements.in << 'EOF'
-tensorflow[and-cuda]==2.20.0
-pandas
-numpy<2.0
-scipy
-pyarrow
-numba
-matplotlib
-seaborn
-tqdm
-orjson
-einops
-h5py
-plotly
-tensorboard
-git+https://github.com/NVlabs/sionna.git@main
-EOF
+pip install                         \
+    "tensorflow[and-cuda]==2.20.0"  \
+    pandas                          \
+    "numpy<2.0"                     \
+    scipy                           \
+    pyarrow                         \
+    numba                           \
+    matplotlib                      \
+    seaborn                         \
+    tqdm                            \
+    orjson                          \
+    einops                          \
+    h5py                            \
+    plotly                          \
+    tensorboard
 
-# Generate lock-file with hashes
-pip-compile --generate-hashes requirements.in
 
-# Install from the lockfile
-pip install -r requirements.txt
+pip install git+https://github.com/NVlabs/sionna.git@main
+
+pip freeze > requirements.txt
+
