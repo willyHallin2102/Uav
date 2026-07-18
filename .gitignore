@@ -11,6 +11,9 @@ __pycache__/
 .vscode/
 .venv/
 
+# Exclude the datasets and any models
+models/
+database/datasets/
 
 # Data/Model files to fully ignore
 *.csv
