@@ -17,7 +17,7 @@ import threading
 import time
 import re
 
-from logs.logger import Logger, Level, Colors, LEVEL_COLOR
+from logs.logger import Logger, Level, Colors
 from typing import Any, List
 
 from tools.utilities import runner, builder, CommandSpec
@@ -50,7 +50,6 @@ def capture_output(f, *args, **kwargs):
     try:
         sys.stdout = output
 
-        # Temporary removal of existing handlers otherwise duplicates appears
         for handler in logging.root.handlers:
             logging.root.removeHandler(handler)
         
@@ -152,14 +151,12 @@ def test_logging_concurrent(args: argparse.Namespace):
             
             time.sleep(0.001)
     
-    # Create and start threads
     threads = []
     for i in range(100):
         t = threading.Thread(target=log_messages, args=(i, 100))
         threads.append(t)
         t.start()
     
-    # Wait for completion
     for t in threads:
         t.join()
     
@@ -303,9 +300,7 @@ def test_get_logger(args: argparse.Namespace):
     print(f"Is instance of logging.Logger: {isinstance(underlying, logging.Logger)}")
     print(f"Logger name: {underlying.name}")
     
-    # Test that we can use the underlying logger
     underlying.info("Message from underlying logger")
-    
     print("\n✅ get_logger test passed")
 
 
@@ -368,17 +363,14 @@ def main():
             "singleton", "Testing the singleton pattern",
             test_singleton, TEST_ARGS,
         ),
-        # Does not Work
         CommandSpec(
             "concurrent", "Test concurrent logging",
             test_logging_concurrent, TEST_ARGS
         ),
-        # Does not work
         CommandSpec(
             "levels", "Test logging severity levels",
             test_logging_levels, TEST_ARGS,
         ),
-        # Does not work
         CommandSpec(
             "message_types", "Logging different types in messages",
             test_message_types, TEST_ARGS,
