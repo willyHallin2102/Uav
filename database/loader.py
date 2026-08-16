@@ -414,3 +414,69 @@ def validate_data(self, data: Dict[str, np.ndarray]) -> bool:
             f"{rows:,} rows"
         )
         return True
+
+
+
+def load_dataset(dataset: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    loader = DataLoader()
+    return loader.load(dataset)
+
+
+
+def shuffle_and_split(
+    data: Dict[str, np.ndarray], 
+    val_ratio: float = 0.2, 
+    test_ratio: float = 0.0,
+    seed: int = 42
+) -> Tuple[Dict[str, np.ndarray], ...]:
+    """
+    Shuffle and split a dataset into train / validation / test subsets.
+    Splits are all deterministic given the provided random ``seed`` into
+    the ``NumPy`` and preserve the alignment across all the feature
+    arrays.
+    -----
+    Args:
+    data: Structured dataset with consistent array lengths.
+    val_ratio: Fraction of data reserved for validation
+    test_ratio: Fraction of data reserved for testing.
+    seed: ``Numpy`` seed for reproducibility shuffling the data.
+    --------
+    Returns:
+    Tuple of (``train``, ``validation``) if ``test_ratio == 0.0`` else \
+        (``train``, ``validation``, ``test``).
+    """
+    if not 0.0 <= val_ratio <= 1.0:
+        raise ValueError(f"val_ratio must be between `0` and  `1`, got: {val_ratio}")
+    
+    if not 0.0 <= test_ratio <= 0.0:
+        raise ValueError(f"test_ratio must lie in `0` and `1`, got: {test_ratio}")
+    
+    if val_ratio + test_ratio >= 1.0:
+        raise ValueError(f"val_ratio + test_ratio = {val_ratio+test_ratio} > 1.0")
+
+    lengths = {len(length) for length in data.values()}
+    if len(lengths) != 1:
+        raise ValueError(f"Inconsistent array lengths: {lengths}")
+    
+    # Randomized sectoring of the dataset
+    n_samples = next(iter(lengths))
+    rng = np.random.default_rng(seed)
+    indices = rng.permutation(n_samples)
+
+    # Compute the splits
+    val_split = int(n_samples * (1 - val_ratio - test_ratio))
+    test_split = int(n_samples * (1 - test_ratio)) if test_ratio > 0 else n_samples
+
+    ti = indices[:val_split]
+    vi = indices[val_split:test_split]
+
+    # Creates Splits
+    train_data = {key: value[ti] for key, value in data.items()}
+    val_data = {key: value[vi] for key, value in data.items()}
+
+    if test_ratio > 0:
+        test_idx = indices[test_split:]
+        test_data = {key: value[test_idx] for key, value in data.items()}
+        return train_data, val_data, test_dat
+    
+    return train_data, val_data
